@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+    <head>
+        <meta charset="UTF-8">
+        <title>欢迎页面-X-admin2.2</title>
+        <meta name="renderer" content="webkit">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+        <link rel="stylesheet" href="./css/font.css">
+        <link rel="stylesheet" href="./css/xadmin.css">
+        <script src="./lib/layui/layui.js" charset="utf-8"></script>
+        <script type="text/javascript" src="./js/xadmin.js"></script>
+        <!--[if lt IE 9]>
+          <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+          <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+    </head>
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row layui-col-space15">
+                <div class="layui-col-sm12 layui-col-md6">
+                    <div class="layui-card">
+                        <div class="layui-card-header">您在该年的通话信息为</div>
+                        <div class="layui-card-body" style="min-height: 300px;">
+                            <div id="main1" class="layui-col-sm12" style="height: 300px;"></div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-col-sm12 layui-col-md6">
+                    <div class="layui-card">
+                        <div class="layui-card-header">每月的通话信息</div>
+                        <div class="layui-card-body" style="min-height: 300px;">
+                            <div id="main2" class="layui-col-sm12" style="height: 300px;"></div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-col-sm12 layui-col-md6">
+                    <div class="layui-card">
+                        <div class="layui-card-header">用户来源</div>
+                        <div class="layui-card-body" style="min-height: 300px;">
+                            <div id="main3" class="layui-col-sm12" style="height: 300px;"></div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-col-sm12 layui-col-md6">
+                    <div class="layui-card">
+                        <div class="layui-card-header">硬盘使用量</div>
+                        <div class="layui-card-body" style="min-height: 300px;">
+                            <div id="main4" class="layui-col-sm12" style="height: 300px;"></div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="../../static/js/jquery-1.11.3.js"></script>
+        <script src="https://cdn.bootcss.com/echarts/4.2.1-rc1/echarts.min.js"></script>
+        <script type="text/javascript">
+
+            $(document).ready(function () {
+                $.ajax({
+                    url:'../../showCall',
+                    type:'post',
+                    dataType:'json',
+                    success:function (data) {
+                        console.log(data);
+                        var sum = 0, dur = 0;
+                        for(let i=0;i<data.calls.length;i++){
+                            // console.log(data.calls[i].dateid);
+                            if(data.calls[i].dateid === 1){
+                                sum = data.calls[i].sumcall;
+                                dur = data.calls[i].sumduration;
+                                dur = dur/3600;
+                            }
+                        }
+
+                        // console.log(sum)
+                        // console.log(dur)
+
+                        // 基于准备好的dom，初始化echarts实例
+                        let myChart = echarts.init(document.getElementById('main1'));
+                        // 指定图表的配置项和数据
+                        let option = {
+                            tooltip: {},
+                            legend: {
+                                data:['']
+                            },
+                            xAxis: {
+                                data: ["通话次数","通话时长"]
+                            },
+                            yAxis: {},
+                            series: [{
+                                name: '通话信息',
+                                type: 'bar',
+                                data: [sum,dur]
+                            }]
+                        };
+                        myChart.setOption(option);
+                    },
+                    error:function (e) {
+                        console.log(e);
+                    }
+
+                });
+
+                $.ajax({
+                    url:'../../showMonth',
+                    type:'post',
+                    dataType:'json',
+                    success:function (data) {
+                        console.log(data);
+
+                        let sumCallMap = new Map();
+                        let sumDurMap = new Map();
+
+                        for(let i = 0; i<data.calls.length;i++){
+                            if(data.calls[i].dateid === 2){
+                                sumCallMap.set("1月",data.calls[i].sumcall);
+                                sumDurMap.set("1月",data.calls[i].sumduration);
+                            }
+                            if(data.calls[i].dateid === 34){
+                                sumCallMap.set("2月",data.calls[i].sumcall);
+                                sumDurMap.set("2月",data.calls[i].sumduration);
+                            }
+                            if(data.calls[i].dateid === 63){
+                                sumCallMap.set("3月",data.calls[i].sumcall);
+                                sumDurMap.set("3月",data.calls[i].sumduration);
+                            }
+                            if(data.calls[i].dateid === 95){
+                                sumCallMap.set("4月",data.calls[i].sumcall);
+                                sumDurMap.set("4月",data.calls[i].sumduration);
+                            }
+                            if(data.calls[i].dateid === 126){
+                                sumCallMap.set("5月",data.calls[i].sumcall);
+                                sumDurMap.set("5月",data.calls[i].sumduration);
+                            }
+                            if(data.calls[i].dateid === 158){
+                                sumCallMap.set("6月",data.calls[i].sumcall);
+                                sumDurMap.set("6月",data.calls[i].sumduration);
+                            }
+                            if(data.calls[i].dateid === 189){
+                                sumCallMap.set("7月",data.calls[i].sumcall);
+                                sumDurMap.set("7月",data.calls[i].sumduration);
+                            }if(data.calls[i].dateid === 221){
+                                sumCallMap.set("8月",data.calls[i].sumcall);
+                                sumDurMap.set("8月",data.calls[i].sumduration);
+                            }
+                            if(data.calls[i].dateid === 253){
+                                sumCallMap.set("9月",data.calls[i].sumcall);
+                                sumDurMap.set("9月",data.calls[i].sumduration);
+                            }
+                            if(data.calls[i].dateid === 284){
+                                sumCallMap.set("10月",data.calls[i].sumcall);
+                                sumDurMap.set("10月",data.calls[i].sumduration);
+                            }
+                            if(data.calls[i].dateid === 316){
+                                sumCallMap.set("11月",data.calls[i].sumcall);
+                                sumDurMap.set("11月",data.calls[i].sumduration);
+                            }if(data.calls[i].dateid === 347){
+                                sumCallMap.set("12月",data.calls[i].sumcall);
+                                sumDurMap.set("12月",data.calls[i].sumduration);
+                            }
+                        }
+
+                        console.log(sumCallMap)
+                        console.log(sumDurMap)
+
+                        let months = [];
+                        let sumCall = [];
+                        let sumDur = [];
+
+                        for(let key of sumCallMap.keys()){
+                            months.push(key);
+                        }
+
+
+                        for(let key of sumDurMap.keys()){
+                            let eee = sumDurMap.get(key)/2400;
+                            sumDur.push(eee);
+                        }
+
+                        for(let key of sumCallMap.keys()){
+                            sumCall.push(sumCallMap.get(key));
+                        }
+
+                        console.log(months);
+                        console.log(sumCall);
+                        console.log(sumDur);
+
+                        // 基于准备好的dom，初始化echarts实例
+                        let myChart = echarts.init(document.getElementById('main2'));
+
+                        // 指定图表的配置项和数据
+                        var option = {
+                            tooltip : {
+                                trigger: 'axis',
+                                axisPointer: {
+                                    type: 'cross',
+                                    label: {
+                                        backgroundColor: '#6a7985'
+                                    }
+                                }
+                            },
+                            grid: {
+                                top: '5%',
+                                right: '2%',
+                                left: '1%',
+                                bottom: '10%',
+                                containLabel: true
+                            },
+                            xAxis : [
+                                {
+                                    type : 'category',
+                                    boundaryGap : false,
+                                    data : months
+                                }
+                            ],
+                            yAxis : [
+                                {
+                                    type : 'value'
+                                }
+                            ],
+                            dataZoom: [
+                                {
+                                    type: 'inside',
+                                    start: 50,
+                                    end: 100
+                                },
+                                {
+                                    show: true,
+                                    type: 'slider',
+                                    y: '90%',
+                                    start: 50,
+                                    end: 100
+                                }
+                            ],
+                            series : [
+                                {
+                                    name:'通话次数',
+                                    type:'line',
+                                    areaStyle: {normal: {}},
+                                    data:sumCall,
+                                    smooth: true
+                                },
+                                {
+                                    name:'通话时间',
+                                    type:'line',
+                                    areaStyle: {normal: {}},
+                                    data:sumDur,
+                                    smooth: true,
+
+                                }
+                            ]
+                        };
+
+
+                        // 使用刚指定的配置项和数据显示图表。
+                        myChart.setOption(option);
+
+
+                    },
+                    error:function (e) {
+                        console.log(e);
+                    }
+                })
+
+
+            });
+
+
+
+
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('main3'));
+
+        // 指定图表的配置项和数据
+        var option = {
+            tooltip : {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'left',
+                data: ['直接访问','邮件营销','联盟广告','视频广告','搜索引擎']
+            },
+            series : [
+                {
+                    name: '访问来源',
+                    type: 'pie',
+                    radius : '55%',
+                    center: ['50%', '60%'],
+                    data:[
+                        {value:335, name:'直接访问'},
+                        {value:310, name:'邮件营销'},
+                        {value:234, name:'联盟广告'},
+                        {value:135, name:'视频广告'},
+                        {value:1548, name:'搜索引擎'}
+                    ],
+                    itemStyle: {
+                        emphasis: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            ]
+        };
+
+
+
+        // 使用刚指定的配置项和数据显示图表。
+        myChart.setOption(option);
+
+         // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('main4'));
+
+        // 指定图表的配置项和数据
+        var option = {
+            tooltip : {
+                formatter: "{a} <br/>{b} : {c}%"
+            },
+            series: [
+                {
+                    name: '硬盘使用量',
+                    type: 'gauge',
+                    detail: {formatter:'{value}%'},
+                    data: [{value: 88, name: '已使用'}]
+                }
+            ]
+        };
+        // 使用刚指定的配置项和数据显示图表。
+        myChart.setOption(option);
+    </script>
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?b393d153aeb26b46e9431fabaf0f6190";
+          var s = document.getElementsByTagName("script")[0]; 
+          s.parentNode.insertBefore(hm, s);
+        })();
+        </script>
+    </body>
+</html>

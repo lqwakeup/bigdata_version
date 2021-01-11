@@ -1,0 +1,196 @@
+<!doctype html>
+<html class="x-admin-sm">
+    <head>
+        <meta charset="UTF-8">
+        <title>所有用户的信息</title>
+        <meta name="renderer" content="webkit|ie-comp|ie-stand">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+        <meta http-equiv="Cache-Control" content="no-siteapp" />
+
+        <link rel="stylesheet" href="./css/font.css">
+        <link rel="stylesheet" href="./css/xadmin.css">
+    </head>
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row layui-col-space15">
+                <div class="layui-col-md12">
+                    <div class="layui-card">
+                        <div class="layui-card-body ">
+                            <blockquote class="layui-elem-quote">
+                                所有用户的通话信息
+                            </blockquote>
+                            <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+                            <div id="main" style="width: 100%;height:400px;"></div>
+<!--                            <blockquote class="layui-elem-quote"></blockquote>-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="../../static/js/jquery-1.11.3.js"></script>
+        <script src="https://cdn.bootcss.com/echarts/4.2.1-rc1/echarts.min.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $.ajax({
+                    url: '../../showAll',
+                    type: 'post',
+                    dataType: 'json',
+                    success: function (data) {
+                        // console.log(data);
+                        // console.log(JSON.stringify(data.calls))
+                        let arraySumCall = [];
+                        let arraySumDur = [];
+                        let userNames = [];
+
+                        for (let i = 0; i < data.calls.length; i++) {
+                            arraySumCall[i] = data.calls[i].sumcall;
+                            arraySumDur[i] = data.calls[i].sumduration;
+                            userNames[i] = data.names[i];
+                        }
+
+                        // //所有用户在一年内的通话次数
+                        // console.log(arraySumCall);
+                        // //所有用户在一年内的通话时间
+                        // console.log(arraySumDur);
+                        // //对应用户
+                        // console.log(userNames);
+
+                        let array = [];
+                        for(let i =0 ;i<userNames.length;i++){
+                            array[i] = [];
+                            array[i][0] = userNames[i];
+                            array[i][1] = arraySumCall[i];
+                            array[i][2] = arraySumDur[i]/2400;
+                        }
+
+                        // console.log(array);
+                        // 基于准备好的dom，初始化echarts实例
+                        var myChart = echarts.init(document.getElementById('main'));
+
+                        var data0 = splitData(array);
+
+                        function splitData(rawData) {
+                            var categoryData = [];
+                            var values = [];
+                            for (var i = 0; i < rawData.length; i++) {
+                                categoryData.push(rawData[i].splice(0, 1)[0]);
+                                values.push(rawData[i])
+                            }
+                            return {
+                                categoryData: categoryData,
+                                values: values
+                            };
+                        }
+
+                        let result = [];
+                        let result1 = [];
+                        for (let i = 0, len = data0.values.length; i < len; i++){
+                            result[i] = data0.values[i][0];
+                            result1[i] = data0.values[i][1];
+                        }
+
+
+                        function calculateMA(dayCount) {
+                            let result = [];
+                            for (let i = 0, len = data0.values.length; i < len; i++) {
+                                if (i < dayCount) {
+                                    result.push('-');
+                                    continue;
+                                }
+                                var sum = 0;
+                                for (var j = 0; j < dayCount; j++) {
+                                    sum += data0.values[i - j][1];
+                                }
+                                result.push(sum / dayCount);
+                            }
+                            return result;
+                        }
+
+
+
+                        option = {
+                            title: {
+                                text: '所有用户的通话信息',
+                                left: 0
+                            },
+                            tooltip: {
+                                trigger: 'axis',
+                                axisPointer: {
+                                    type: 'line'
+                                }
+                            },
+                            legend: {
+                                data: ['MA5', 'MA10', 'MA20', 'MA30']
+                            },
+                            grid: {
+                                left: '10%',
+                                right: '10%',
+                                bottom: '15%'
+                            },
+                            xAxis: {
+                                type: 'category',
+                                data: data0.categoryData,
+                            },
+                            yAxis: {
+                                scale: true,
+                                splitArea: {
+                                    show: true
+                                }
+                            },
+                            dataZoom: [
+                                {
+                                    type: 'inside',
+                                    start: 50,
+                                    end: 100
+                                },
+                                {
+                                    show: true,
+                                    type: 'slider',
+                                    y: '90%',
+                                    start: 50,
+                                    end: 100
+                                }
+                            ],
+                            series: [
+                                {
+                                    name: '通话次数',
+                                    type: 'line',
+                                    data: result,
+                                    smooth: true,
+                                    lineStyle: {
+                                        normal: {opacity: 0.5}
+                                    }
+                                },
+                                {
+                                    name: '通话时长',
+                                    type: 'line',
+                                    data: result1,
+                                    smooth: true,
+                                    lineStyle: {
+                                        normal: {opacity: 0.5}
+                                    }
+                                },
+                            ]
+                        };
+
+                        // 使用刚指定的配置项和数据显示图表。
+                        myChart.setOption(option);
+                    },
+                    error: function (e) {
+                        console.log("error");
+                    }
+                })
+            });
+    </script>
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?b393d153aeb26b46e9431fabaf0f6190";
+          var s = document.getElementsByTagName("script")[0]; 
+          s.parentNode.insertBefore(hm, s);
+        })();
+        </script>
+    </body>
+</html>

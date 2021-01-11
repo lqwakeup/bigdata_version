@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>所有用户的使用情况</title>
+
+    <style>
+        .title_font{
+            text-align: center;
+            font-size: 20px;
+        }
+        #content_bottom1{
+            position: relative;
+            top:100px;
+            left:410px;
+        }
+
+        #content_bottom2{
+            position: relative;
+            top:150px;
+            left:430px;
+        }
+
+        button{
+            cursor: pointer;
+        }
+
+        .box-top,#content_bottom0{
+            position: relative;
+            top:115px;
+            left: 84px;
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+<!--        <div class="box-top">-->
+<!--            <input type="text" id="tel">-->
+<!--            <button onclick="search()">搜索</button>-->
+<!--        </div>-->
+
+        <div class="box_top">
+            <p class="title_font">电信可视化</p>
+        </div>
+<!--        <div id="content_bottom0" style="width: 300px;height:400px;text-align: center"></div>-->
+        <div id="content_bottom1" style="width: 600px;height:400px;"></div>
+        <div id="content_bottom2" style="width: 600px;height:400px;"></div>
+    </div>
+
+    <script src="../static/js/jquery-1.11.3.js"></script>
+    <script src="https://cdn.staticfile.org/echarts/4.3.0/echarts.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                url: '../showAll',
+                type: 'post',
+                dataType: 'json',
+                success: function (data) {
+                    // console.log(data);
+
+                    // console.log(JSON.stringify(data.calls))
+
+                    let arraySumCall = [];
+                    let arraySumDur = [];
+                    let userNames = [];
+
+                    for (let i = 0; i < data.calls.length; i++) {
+                        arraySumCall[i] = data.calls[i].sumcall;
+                        arraySumDur[i] = data.calls[i].sumduration;
+                        userNames[i] = data.names[i];
+                    }
+
+                    //所有用户在一年内的通话次数
+                    console.log(arraySumCall);
+                    //所有用户在一年内的通话时间
+                    console.log(arraySumDur);
+                    //对应用户
+                    console.log(userNames);
+
+                    let content = document.getElementById("content_bottom1");
+                    let content2 = document.getElementById("content_bottom2");
+                    let myChart = echarts.init(content);
+                    let myChart1 = echarts.init(content2);
+
+                    let dataPie = "[";
+                    for (let i = 0; i < userNames.length; i++) {
+                        if (i !== userNames.length - 1) {
+                            dataPie += `{"value":${arraySumDur[i]},"name":"${userNames[i]}"},`
+                        } else {
+                            dataPie += `{"value":${arraySumDur[i]},"name":"${userNames[i]}"}]`
+                        }
+
+                    }
+                    let dataPJSON = $.parseJSON(dataPie);
+                    console.log(dataPJSON);
+
+                    let dataPie1 = "[";
+                    for (let i = 0; i < userNames.length; i++) {
+                        if (i !== userNames.length - 1) {
+                            dataPie1 += `{"value":${arraySumCall[i]},"name":"${userNames[i]}"},`
+                        } else {
+                            dataPie1 += `{"value":${arraySumCall[i]},"name":"${userNames[i]}"}]`
+                        }
+
+                    }
+                    let dataPJSON1 = $.parseJSON(dataPie1);
+                    console.log(dataPJSON1);
+
+
+                    myChart.setOption({
+                        series: [
+                            {
+                                name: '访问来源',
+                                type: 'pie',    // 设置图表类型为饼图
+                                radius: '70%',  // 饼图的半径，外半径为可视区尺寸（容器高宽中较小一项）的 55% 长度。
+                                data: dataPJSON,          // 数据数组，name 为数据项名称，value 为数据项值
+                                // itemStyle: {
+                                //     emphasis: {
+                                //         shadowBlur: 10,
+                                //         shadowOffsetX: 0,
+                                //         shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                //     },
+                                //     normal: {
+                                //         label: {
+                                //             show: true,
+                                //             formatter: '{b} : {c} ({d}%)'
+                                //         },
+                                //         labelLine: {show: true}
+                                //     }
+                                // }
+                            }
+                        ]
+                    });
+
+                    myChart1.setOption({
+                        series: [
+                            {
+                                name: '访问来源',
+                                type: 'pie',    // 设置图表类型为饼图
+                                radius: '70%',  // 饼图的半径，外半径为可视区尺寸（容器高宽中较小一项）的 55% 长度。
+                                data: dataPJSON1,          // 数据数组，name 为数据项名称，value 为数据项值
+                                itemStyle: {
+                                    emphasis: {
+                                        shadowBlur: 10,
+                                        shadowOffsetX: 0,
+                                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                    },
+                                    normal: {
+                                        label: {
+                                            show: true,
+                                            formatter: '{b} : {c} ({d}%)'
+                                        },
+                                        labelLine: {show: true}
+                                    }
+                                }
+                            }
+                        ]
+                    })
+
+
+                },
+                error: function (e) {
+                    console.log("error");
+                }
+            })
+        });
+
+
+        function search() {
+            $.ajax({
+                url:'../showCall',
+                type:'post',
+                dataType:'json',
+                data:{
+                    tel:$('#tel').val()
+                },
+                success:function (data) {
+                    // console.log(data.calls);
+                    let content = document.getElementById("content_bottom0");
+                    let myChart = echarts.init(content);
+                    var sum = 0, dur = 0;
+                    for(let i=0;i<data.calls.length;i++){
+                        // console.log(data.calls[i].dateid);
+                        if(data.calls[i].dateid === 1){
+                            sum = data.calls[i].sumcall;
+                            dur = data.calls[i].sumduration;
+                            dur = dur/3600;
+                        }
+                    }
+
+                    console.log(sum)
+                    console.log(dur)
+
+                    // 指定图表的配置项和数据
+                    var option = {
+                        title: {
+                            text: '该用户在该年手机使用情况为'
+                        },
+                        tooltip: {},
+                        legend: {
+                            data:['']
+                        },
+                        xAxis: {
+                            data: ["通话次数","通话时长"]
+                        },
+                        yAxis: {},
+                        series: [{
+                            name: '销量',
+                            type: 'bar',
+                            data: [sum,dur]
+                        }]
+                    };
+                    myChart.setOption(option);
+
+                    // let textNode = document.createTextNode(data);
+                    // content.appendChild(textNode);
+                },
+                error:function (e) {
+                    console.log(e);
+                }
+
+            })
+
+        }
+
+    </script>
+</body>
+</html>

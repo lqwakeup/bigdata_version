@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>数据分析</title>
+</head>
+<body>
+    <input type="text" id="tel">
+    <button onclick="test()">test</button>
+
+<script src="../static/js/jquery-1.11.3.js"></script>
+<script>
+    function test() {
+        $.ajax({
+            url:'../showUser',
+            type:'post',
+            dataType:'json',
+            data:{
+              tel:$('#tel').val()
+            },
+            success:function (data) {
+                console.log(data)
+            },
+            error:function (err) {
+                console.log(err);
+            }
+        })
+
+    }
+</script>
+</body>
+</html>

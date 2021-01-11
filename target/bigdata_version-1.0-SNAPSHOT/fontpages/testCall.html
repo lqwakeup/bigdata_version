@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>testCall</title>
+</head>
+<body>
+
+    <div class="container">
+        <div class="box">
+            <input type="text" id="tel">
+            <button onclick="test()">搜索</button>
+        </div>
+    </div>
+
+
+    <script src="../static/js/jquery-1.11.3.js"></script>
+    <script>
+        function test() {
+            $.ajax({
+                url:'../showCall',
+                type:'post',
+                dataType:'json',
+                data:{
+                    tel:$('#tel').val()
+                },
+                success:function (data) {
+                    console.log(data)
+                },
+                error:function (err) {
+                    console.log("错误");
+                }
+            })
+
+        }
+    </script>
+
+</body>
+</html>
